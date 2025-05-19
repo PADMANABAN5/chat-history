@@ -4,7 +4,8 @@ const path = require("path");
 const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
+
 
 // Middleware
 app.use(cors());
@@ -77,8 +78,7 @@ app.get("/loadChat/:username", (req, res) => {
 app.get("/", (req, res) => {
   res.send("✅ Chat API is running!");
 });
-
-// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running at http://localhost:${PORT}`);
 });
+
