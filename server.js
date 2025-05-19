@@ -14,12 +14,10 @@ app.use(express.json());
 // Chat history folder
 const chatFolder = path.join(__dirname, "chatHistories");
 
-// Create folder if it doesn't exist
 if (!fs.existsSync(chatFolder)) {
   fs.mkdirSync(chatFolder);
 }
 
-// ✅ Save chat history to file
 app.post("/api/saveChatHistory", async (req, res) => {
   try {
     const { username, model, timestamp, chatHistory } = req.body;
@@ -49,7 +47,7 @@ app.post("/api/saveChatHistory", async (req, res) => {
   }
 });
 
-// ✅ Load chat history from file
+
 app.get("/loadChat/:username", (req, res) => {
   const { username } = req.params;
   const filePath = path.join(chatFolder, `${username}.json`);
