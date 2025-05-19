@@ -1,0 +1,15 @@
+{
+  "username": "padmanaban",
+  "model": "GPT-4",
+  "timestamp": "2025-05-19T13:00:00Z",
+  "chatHistory": [
+    {
+      "user": "Hello!",
+      "system": "Hi there! How can I help you?"
+    },
+    {
+      "user": "What is Node.js?",
+      "system": "Node.js is a runtime built on Chrome's V8 JavaScript engine."
+    }
+  ]
+}
