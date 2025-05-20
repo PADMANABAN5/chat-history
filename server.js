@@ -17,7 +17,7 @@ const chatDir = path.join(__dirname, "chats");
 if (!fs.existsSync(chatDir)) fs.mkdirSync(chatDir);
 
 // Load chat history
-app.get("/chat/:username", (req, res) => {
+app.get("/api/chat/:username", (req, res) => {
   const sanitized = sanitizeFilename(req.params.username);
   const filePath = path.join(chatDir, `${sanitized}.txt`);
   fs.readFile(filePath, "utf8", (err, data) => {
@@ -57,7 +57,7 @@ app.use((req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = 10000;
 app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
