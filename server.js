@@ -21,28 +21,26 @@ if (!fs.existsSync(chatFolder)) {
   fs.mkdirSync(chatFolder);
 }
 
-// ✅ Save chat history to file
 app.post("/api/saveChatHistory", async (req, res) => {
   try {
     const { username, model, timestamp, chatHistory } = req.body;
 
+    console.log("Received data:", req.body);
+
     if (!username || !chatHistory) {
+      console.log("Missing fields:", { username, chatHistory });
       return res.status(400).json({ success: false, error: "Missing required fields" });
     }
 
     const filePath = path.join(chatFolder, `${username}.json`);
-    const dataToSave = {
-      username,
-      model,
-      timestamp,
-      chatHistory,
-    };
+    const dataToSave = { username, model, timestamp, chatHistory };
 
     fs.writeFile(filePath, JSON.stringify(dataToSave, null, 2), (err) => {
       if (err) {
         console.error("Error saving chat history:", err);
         return res.status(500).json({ success: false, error: "Failed to save chat history" });
       }
+      console.log("✅ Chat saved:", filePath);
       res.json({ success: true });
     });
   } catch (err) {
@@ -51,7 +49,6 @@ app.post("/api/saveChatHistory", async (req, res) => {
   }
 });
 
-// ✅ Load chat history from file
 app.get("/loadChat/:username", (req, res) => {
   const { username } = req.params;
   const filePath = path.join(chatFolder, `${username}.json`);
