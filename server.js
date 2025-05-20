@@ -1,84 +1,50 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const cors = require("cors");
-
+// server.js
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors({
-  origin: ["http://localhost:3000", "https://tiny-magic-1.onrender.com"]
-}));
+const PORT = process.env.PORT || 3000;
+const chatFilePath = './chats.json';
 
+app.use(cors());
 app.use(express.json());
 
-// Chat history folder
-const chatFolder = path.join(__dirname, "chatHistories");
-
-// Create folder if it doesn't exist
-if (!fs.existsSync(chatFolder)) {
-  fs.mkdirSync(chatFolder);
+// Load existing chat data from file
+let chatStorage = {};
+if (fs.existsSync(chatFilePath)) {
+  const fileData = fs.readFileSync(chatFilePath);
+  chatStorage = JSON.parse(fileData);
 }
 
-app.post("/api/saveChatHistory", async (req, res) => {
-  try {
-    const { username, model, timestamp, chatHistory } = req.body;
+// Save chatStorage to file
+function saveChatToFile() {
+  fs.writeFileSync(chatFilePath, JSON.stringify(chatStorage, null, 2));
+}
 
-    console.log("Received data:", req.body);
+// Save chat history
+app.post('/api/saveChatHistory', (req, res) => {
+  const { username, model, chatHistory, timestamp } = req.body;
 
-    if (!username || !chatHistory) {
-      console.log("Missing fields:", { username, chatHistory });
-      return res.status(400).json({ success: false, error: "Missing required fields" });
-    }
+  if (!chatStorage[username]) chatStorage[username] = [];
 
-    const filePath = path.join(chatFolder, `${username}.json`);
-    const dataToSave = { username, model, timestamp, chatHistory };
+  chatStorage[username].push({ model, chatHistory, timestamp });
 
-    fs.writeFile(filePath, JSON.stringify(dataToSave, null, 2), (err) => {
-      if (err) {
-        console.error("Error saving chat history:", err);
-        return res.status(500).json({ success: false, error: "Failed to save chat history" });
-      }
-      console.log("✅ Chat saved:", filePath);
-      res.json({ success: true });
-    });
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    res.status(500).json({ success: false, error: "Unexpected error occurred" });
-  }
+  saveChatToFile(); // persist to file
+
+  res.status(200).json({ message: 'Chat history saved successfully' });
 });
 
-app.get("/loadChat/:username", (req, res) => {
-  const { username } = req.params;
-  const filePath = path.join(chatFolder, `${username}.json`);
+// Load chat history
+app.get('/loadChat/:username', (req, res) => {
+  const username = req.params.username;
+  const chats = chatStorage[username] || [];
 
-  if (!fs.existsSync(filePath)) {
-    return res.json({ chatHistory: [] });
-  }
-
-  fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading chat:", err);
-      return res.status(500).json({ message: "Failed to load chat." });
-    }
-
-    try {
-      const parsedData = JSON.parse(data);
-      res.json(parsedData); // { username, model, timestamp, chatHistory }
-    } catch (parseError) {
-      console.error("Error parsing chat file:", parseError);
-      res.status(500).json({ message: "Corrupted chat file" });
-    }
-  });
+  res.status(200).json({ chatHistory: chats });
 });
 
-// Health check route
-app.get("/", (req, res) => {
-  res.send("✅ Chat API is running!");
-});
-
-// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running at http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
+
+
